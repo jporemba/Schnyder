@@ -19,6 +19,8 @@ nodes = [
     'k'
 ]
 
+red_root = 'v1'
+
 red_edges = [
     ('a', 'v1'),
     ('b', 'v1'),
@@ -33,6 +35,7 @@ red_edges = [
     ('k', 'd')
 ]
 
+green_root = 'v3'
 green_edges = [
     ('j', 'v3'),
     ('k', 'v3'),
@@ -47,6 +50,7 @@ green_edges = [
     ('h', 'i')
 ]
 
+blue_root = 'v2'
 blue_edges = [
     ('a', 'v2'),
     ('h', 'v2'),
@@ -61,13 +65,4 @@ blue_edges = [
     ('g', 'f')
 ]
 
-# schnyder coordinates
-
-r = {
-    'j': 1,
-    'k': 2,
-    
-}
-g = dict()
-b = dict()
 

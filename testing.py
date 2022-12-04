@@ -59,36 +59,19 @@ def is_valid_walk(G, s, t, path):
             current = next            
     return True
 
-def is_valid_walk(G, s, t, path):
-    if len(path) == 0:
-        return s == t
-    else:
-        if s not in path[0]:
-            return False
-        if t not in path[-1]:
-            return False
-        current = s
-        for edge in path:
-            if edge not in G.edges:
-                return False
-            if current not in edge:
-                return False
-            next = set(edge).difference({current}).pop()
-            current = next            
-    return True
-
 class TestRouting(unittest.TestCase):
     
     def setUp(self):
-        self.woods = schnyder.Woods(ex1.G, ex1.red_root, ex1.red_edges, ex1.green_root, ex1.green_edges, ex1.blue_root, ex1.blue_edges)
+        self.W1 = schnyder.Woods(ex1.G, ex1.red_root, ex1.red_edges, ex1.green_root, ex1.green_edges, ex1.blue_root, ex1.blue_edges)
+        self.W2 = schnyder.Woods(ex2.G, ex2.red_root, ex2.red_edges, ex2.green_root, ex2.green_edges, ex2.blue_root, ex2.blue_edges)
         
     def test_no_explode(self):
         for s in ex1.G.nodes:
             for t in ex1.G.nodes:
-                localroute.schnyder_local_route(ex1.G, self.woods, s, t)
+                localroute.schnyder_local_route(ex1.G, self.W1, s, t)
         for s in ex2.G.nodes:
             for t in ex2.G.nodes:
-                localroute.schnyder_local_route(ex2.G, self.woods, s, t)
+                localroute.schnyder_local_route(ex2.G, self.W2, s, t)
     
     def test_meta_valid_paths(self):
         valid_path = [(2, 3), (3, 4), (4, 7), (7, 8), (8, 1), (1, 9)]
@@ -101,11 +84,11 @@ class TestRouting(unittest.TestCase):
     def test_valid_paths(self):
         for s in ex1.G.nodes:
             for t in ex1.G.nodes:
-                routing_path = localroute.schnyder_local_route(ex1.G, self.woods, s, t)
+                routing_path = localroute.schnyder_local_route(ex1.G, self.W1, s, t)
                 assert is_valid_walk(ex1.G, s, t, routing_path)
         for s in ex2.G.nodes:
             for t in ex2.G.nodes:
-                routing_path = localroute.schnyder_local_route(ex2.G, self.woods, s, t)
+                routing_path = localroute.schnyder_local_route(ex2.G, self.W2, s, t)
                 assert is_valid_walk(ex2.G, s, t, routing_path)
 
 class TestRoutingFile(unittest.TestCase):
@@ -129,7 +112,7 @@ class TestEval(unittest.TestCase):
     
     def setUp(self):
         self.subtests = []
-        for i in [1]:
+        for i in [1, 2, 3, 4]:
             G, W = evaluation.parse_edgelist_to_woods(f'unittest{i}.edgelist')
             self.subtests.append((G, W))
             
