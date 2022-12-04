@@ -1,6 +1,8 @@
 import networkx as nx
 
 class Woods:
+    # It is optional to include the bounding triangle in the coloured edges - it will not affect anything.
+    # However, they must still be present in G itself.
 
     def __init__(self, G, red_root, red_edges, green_root, green_edges, blue_root, blue_edges):
         self.G = G
@@ -25,23 +27,23 @@ class Woods:
     
     def red_parent(self, node):
         if node in self.roots:
-            raise Exception("Cannot take red parent of root")
+            raise Exception(f"Cannot take red parent of root {node}")
         parents = list(self.red_tree.successors(node))
-        assert len(parents) == 1
+        assert len(parents) == 1, f'node {node} has red parents {parents}'
         return parents[0]
     
     def green_parent(self, node):
         if node in self.roots:
-            raise Exception("Cannot take green parent of root")
+            raise Exception(f"Cannot take green parent of root {node}")
         parents = list(self.green_tree.successors(node))
-        assert len(parents) == 1
+        assert len(parents) == 1, f'node {node} has green parents {parents}'
         return parents[0]
     
     def blue_parent(self, node):
         if node in self.roots:
-            raise Exception("Cannot take blue parent of root")
+            raise Exception(f"Cannot take blue parent of root {node}")
         parents = list(self.blue_tree.successors(node))
-        assert len(parents) == 1
+        assert len(parents) == 1, f'node {node} has blue parents {parents}'
         return parents[0]
             
     def subtree_size_red(self, node): 

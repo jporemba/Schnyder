@@ -152,3 +152,5 @@ if __name__ == '__main__':
         assert W.region_size_triangles_red(node) == red_coords[node]
         assert W.region_size_triangles_blue(node) == blue_coords[node]
         assert W.region_size_triangles_green(node) == green_coords[node]
+    
+    print(localroute.schnyder_local_route(G, W, 1, 2))

@@ -2,6 +2,8 @@ import unittest
 import schnyder
 import localroute
 import example1 as ex1
+import example2 as ex2
+import evaluation
 
 class TestSchnyderData(unittest.TestCase):
     
@@ -84,6 +86,9 @@ class TestRouting(unittest.TestCase):
         for s in ex1.G.nodes:
             for t in ex1.G.nodes:
                 localroute.schnyder_local_route(ex1.G, self.woods, s, t)
+        for s in ex2.G.nodes:
+            for t in ex2.G.nodes:
+                localroute.schnyder_local_route(ex2.G, self.woods, s, t)
     
     def test_meta_valid_paths(self):
         valid_path = [(2, 3), (3, 4), (4, 7), (7, 8), (8, 1), (1, 9)]
@@ -98,7 +103,27 @@ class TestRouting(unittest.TestCase):
             for t in ex1.G.nodes:
                 routing_path = localroute.schnyder_local_route(ex1.G, self.woods, s, t)
                 assert is_valid_walk(ex1.G, s, t, routing_path)
+        for s in ex2.G.nodes:
+            for t in ex2.G.nodes:
+                routing_path = localroute.schnyder_local_route(ex2.G, self.woods, s, t)
+                assert is_valid_walk(ex2.G, s, t, routing_path)
+
+class TestRoutingFile(unittest.TestCase):
     
+    def setUp(self):
+        self.subtests = []
+        for i in [1, 2, 3, 4]:
+            G, W = evaluation.parse_edgelist_to_woods(f'unittest{i}.edgelist')
+            self.subtests.append((G, W))
+        
+    def test_valid_paths(self):
+        for subtest in self.subtests:
+            G, W = subtest
+            for s in G.nodes:
+                for t in G.nodes:
+                    # print(f's: {s}, t: {t}')
+                    routing_path = localroute.schnyder_local_route(G, W, s, t)
+                    assert is_valid_walk(G, s, t, routing_path)
 
 if __name__ == '__main__':
     unittest.main()

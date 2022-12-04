@@ -1,0 +1,6 @@
+3 -3 {'weight': 'red'}
+3 -1 {'weight': 'green'}
+3 -2 {'weight': 'blue'}
+4 -1 {'weight': 'green'}
+4 -2 {'weight': 'blue'}
+4 3 {'weight': 'red'}
