@@ -1,5 +1,9 @@
 import networkx as nx
 
+# TODO:
+# Enums for colours,
+# cnext, cprev maps
+
 class Woods:
     # It is optional to include the bounding triangle in the coloured edges - it will not affect anything.
     # However, they must still be present in G itself.
@@ -34,6 +38,13 @@ class Woods:
         self.path_length_red_map = dict()
         self.path_length_blue_map = dict()
         self.path_length_green_map = dict()
+        
+        self.subtree_size_path_sum_red_blue_map = dict()
+        self.subtree_size_path_sum_red_green_map = dict()
+        self.subtree_size_path_sum_blue_red_map = dict()
+        self.subtree_size_path_sum_blue_green_map = dict()
+        self.subtree_size_path_sum_green_red_map = dict()
+        self.subtree_size_path_sum_green_blue_map = dict()
     
     def red_parent(self, node):
         if node in self.roots:
@@ -75,6 +86,7 @@ class Woods:
                 return sum([self.subtree_size_red(child) for child in children]) + 1
     
     def subtree_size_blue(self, node):
+        # return memoizer(self.subtree_size_blue_map, self.compute_subtree_size_blue, node)
         if node not in self.subtree_size_blue_map:
             self.subtree_size_blue_map[node] = self.compute_subtree_size_blue(node)
         return self.subtree_size_blue_map[node]
@@ -145,14 +157,77 @@ class Woods:
             self.region_size_nodes_red_map[node] = self.compute_region_size_nodes_red(node)
         return self.region_size_nodes_red_map[node]
     
+    # First colour is subtree, second colour is path
+    def subtree_size_path_sum_red_blue(self, node):
+        return memoizer(self.subtree_size_path_sum_red_blue_map, self.compute_subtree_size_path_sum_red_blue, node)
+    
+    def compute_subtree_size_path_sum_red_blue(self, node):
+        if node == self.blue_root:
+            return self.subtree_size_red(node)
+        else:
+            return self.subtree_size_path_sum_red_blue(self.blue_parent(node)) + self.subtree_size_red(node)
+        # return sum(self.subtree_size_red(u) for u in self.path_nodes_blue(node))
+        
+    
+    def subtree_size_path_sum_red_green(self, node):
+        return memoizer(self.subtree_size_path_sum_red_green_map, self.compute_subtree_size_path_sum_red_green, node)
+
+    def compute_subtree_size_path_sum_red_green(self, node):
+        if node == self.green_root:
+            return self.subtree_size_red(node)
+        else:
+            return self.subtree_size_path_sum_red_green(self.green_parent(node)) + self.subtree_size_red(node)
+        # return sum(self.subtree_size_red(u) for u in self.path_nodes_green(node))
+    
+    
+    def subtree_size_path_sum_blue_red(self, node):
+        return memoizer(self.subtree_size_path_sum_blue_red_map, self.compute_subtree_size_path_sum_blue_red, node)
+    
+    def compute_subtree_size_path_sum_blue_red(self, node):
+        if node == self.red_root:
+            return self.subtree_size_blue(node)
+        else:
+            return self.subtree_size_path_sum_blue_red(self.red_parent(node)) + self.subtree_size_blue(node)
+        # return sum(self.subtree_size_blue(u) for u in self.path_nodes_red(node))
+
+    def subtree_size_path_sum_blue_green(self, node):
+        return memoizer(self.subtree_size_path_sum_blue_green_map, self.compute_subtree_size_path_sum_blue_green, node)
+
+    def compute_subtree_size_path_sum_blue_green(self, node):
+        if node == self.green_root:
+            return self.subtree_size_blue(node)
+        else:
+            return self.subtree_size_path_sum_blue_green(self.green_parent(node)) + self.subtree_size_blue(node)
+        # return sum(self.subtree_size_blue(u) for u in self.path_nodes_green(node))
+    
+    def subtree_size_path_sum_green_red(self, node):
+        return memoizer(self.subtree_size_path_sum_green_red_map, self.compute_subtree_size_path_sum_green_red, node)
+    
+    def compute_subtree_size_path_sum_green_red(self, node):
+        if node == self.red_root:
+            return self.subtree_size_green(node)
+        else:
+            return self.subtree_size_path_sum_green_red(self.red_parent(node)) + self.subtree_size_green(node)
+        # return sum(self.subtree_size_green(u) for u in self.path_nodes_red(node))
+
+    def subtree_size_path_sum_green_blue(self, node):
+        return memoizer(self.subtree_size_path_sum_green_blue_map, self.compute_subtree_size_path_sum_green_blue, node)
+    
+    def compute_subtree_size_path_sum_green_blue(self, node):
+        if node == self.blue_root:
+            return self.subtree_size_green(node)
+        else:
+            return self.subtree_size_path_sum_green_blue(self.blue_parent(node)) + self.subtree_size_green(node)
+        # return sum(self.subtree_size_green(u) for u in self.path_nodes_blue(node))
+    
     def compute_region_size_nodes_red(self, node):
         if node == self.red_root:
             return self.n
         elif node in self.roots:
             return 1
         else:
-            blue_contribution = sum(self.subtree_size_red(u) for u in self.path_nodes_blue(node))
-            green_contribution = sum(self.subtree_size_red(u) for u in self.path_nodes_green(node))
+            blue_contribution = self.subtree_size_path_sum_red_blue(node)
+            green_contribution = self.subtree_size_path_sum_red_green(node)
             return blue_contribution + green_contribution - self.subtree_size_red(node)
     
     def region_size_nodes_blue(self, node):
@@ -166,8 +241,8 @@ class Woods:
         elif node in self.roots:
             return 1
         else:
-            red_contribution = sum(self.subtree_size_blue(u) for u in self.path_nodes_red(node))
-            green_contribution = sum(self.subtree_size_blue(u) for u in self.path_nodes_green(node))
+            red_contribution = self.subtree_size_path_sum_blue_red(node)
+            green_contribution = self.subtree_size_path_sum_blue_green(node)
             return red_contribution + green_contribution - self.subtree_size_blue(node)
     
     def region_size_nodes_green(self, node):
@@ -181,8 +256,8 @@ class Woods:
         elif node in self.roots:
             return 1
         else:
-            red_contribution = sum(self.subtree_size_green(u) for u in self.path_nodes_red(node))
-            blue_contribution = sum(self.subtree_size_green(u) for u in self.path_nodes_blue(node))
+            red_contribution = self.subtree_size_path_sum_green_red(node)
+            blue_contribution = self.subtree_size_path_sum_green_blue(node)
             return red_contribution + blue_contribution - self.subtree_size_green(node)
     
     # in number of edges
@@ -240,3 +315,8 @@ class Woods:
             n_nodes = self.region_size_nodes_green(node)
             exterior_cycle_length = self.path_length_red(node) + self.path_length_blue(node) + 1
             return 2 * n_nodes - 2 - exterior_cycle_length
+
+def memoizer(map, fn, node):
+    if node not in map:
+        map[node] = fn(node)
+    return map[node]
