@@ -16,11 +16,11 @@ def evaluate_routing_protocol(G, woods):
     return distortion
 
 def evaluate_routing_protocol_faster(G, woods):
-    true_distance = dict()
     routing_distance = dict()
     distortion = dict()
     for t in G.nodes:
         T = localroute.fixed_dest_routing_tree(G, woods, t)
+        true_dist_to_t = dict(nx.single_target_shortest_path_length(G, t))
         nodes = [t]
         i = 0
         while len(nodes) > 0:
@@ -29,9 +29,8 @@ def evaluate_routing_protocol_faster(G, woods):
             for node in nodes:
                 next_nodes.extend(list(T.predecessors(node)))
             for s in next_nodes:
-                true_distance[(s, t)] = nx.shortest_path_length(G, s, t)
                 routing_distance[(s, t)] = i
-                distortion[(s, t)] = routing_distance[(s, t)] / true_distance[(s, t)]
+                distortion[(s, t)] = routing_distance[(s, t)] / true_dist_to_t[s]
             nodes = next_nodes
     return distortion
 
@@ -71,7 +70,7 @@ if __name__ == '__main__':
         # 'eval-n500-1.edgelist',
         # 'eval-n500-2.edgelist',
         # 'eval-n500-3.edgelist',
-        'eval-n1000-1.edgelist',
+        'eval-n1500-1.edgelist',
     ]
 
     for test in tests:
