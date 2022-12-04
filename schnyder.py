@@ -186,13 +186,29 @@ class Woods:
             return red_contribution + blue_contribution - self.subtree_size_green(node)
     
     # in number of edges
+    
     def path_length_red(self, node):
+        if node not in self.path_length_red_map:
+            self.path_length_red_map[node] = self.compute_path_length_red(node)
+        return self.path_length_red_map[node]
+    
+    def compute_path_length_red(self, node):
         return len(self.path_nodes_red(node)) - 1
     
     def path_length_blue(self, node):
+        if node not in self.path_length_blue_map:
+            self.path_length_blue_map[node] = self.compute_path_length_blue(node)
+        return self.path_length_blue_map[node]
+    
+    def compute_path_length_blue(self, node):
         return len(self.path_nodes_blue(node)) - 1
     
     def path_length_green(self, node):
+        if node not in self.path_length_green_map:
+            self.path_length_green_map[node] = self.compute_path_length_green(node)
+        return self.path_length_green_map[node]
+    
+    def compute_path_length_green(self, node):
         return len(self.path_nodes_green(node)) - 1
     
     def region_size_triangles_red(self, node):
