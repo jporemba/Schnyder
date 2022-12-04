@@ -84,5 +84,11 @@ def schnyder_local_route(G, woods, src, dest):
         current = next
     return path
 
-
-
+def fixed_dest_routing_tree(G, woods, dest):
+    T = nx.DiGraph()
+    T.add_nodes_from(G.nodes)
+    for node in G.nodes:
+        if node != dest:
+            next = schnyder_next(G, woods, node, dest)
+            T.add_edge(node, next)
+    return T

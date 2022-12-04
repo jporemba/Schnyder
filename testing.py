@@ -125,5 +125,21 @@ class TestRoutingFile(unittest.TestCase):
                     routing_path = localroute.schnyder_local_route(G, W, s, t)
                     assert is_valid_walk(G, s, t, routing_path)
 
+class TestEval(unittest.TestCase):
+    
+    def setUp(self):
+        self.subtests = []
+        for i in [1]:
+            G, W = evaluation.parse_edgelist_to_woods(f'unittest{i}.edgelist')
+            self.subtests.append((G, W))
+            
+    def test_evaluate_routing_protocol_faster(self):
+        for subtest in self.subtests:
+            G, W = subtest
+            distortion1 = evaluation.evaluate_routing_protocol(G, W)
+            distortion2 = evaluation.evaluate_routing_protocol_faster(G, W)
+            assert len(distortion1) == len(distortion2)
+            assert distortion1 == distortion2, f'\nd1: {distortion1}\nd2: {distortion2}'
+
 if __name__ == '__main__':
     unittest.main()
