@@ -45,13 +45,15 @@ def parse_edgelist_to_woods(filename):
 
 if __name__ == '__main__':
     tests = [
-        'unittest.edgelist'
+        'eval-n100-1.edgelist',
+        'eval-n100-2.edgelist',
+        'eval-n100-3.edgelist'
     ]
 
     for test in tests:
         print(f'Test: {test}')
         G, W = parse_edgelist_to_woods(test)
-        print(G.edges)
-        # distortion = evaluate_routing_protocol(G, W)
-        # print(f'Min distortion: {min(distortion.values())}')
-        # print(f'Max distortion: {max(distortion.values())}')
+        # print(G.edges)
+        distortion = evaluate_routing_protocol(G, W)
+        print(f'Min distortion: {min(distortion.values())}')
+        print(f'Max distortion: {max(distortion.values())}')
