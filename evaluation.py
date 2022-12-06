@@ -1,6 +1,8 @@
 import networkx as nx
 import schnyder
 import localroute
+import sys
+from multiprocessing import Pool
 
 def evaluate_routing_protocol(G, woods):
     true_distance = dict()
@@ -62,21 +64,34 @@ def parse_edgelist_to_woods(filename):
     W = schnyder.Woods(G, -3, red_edges, -1, green_edges, -2, blue_edges)
     return (G, W)
 
-if __name__ == '__main__':
-    tests = [
-        # 'eval-n100-1.edgelist',
-        # 'eval-n100-2.edgelist',
-        # 'eval-n100-3.edgelist',
-        # 'eval-n500-1.edgelist',
-        # 'eval-n500-2.edgelist',
-        # 'eval-n500-3.edgelist',
-        'eval-n1500-1.edgelist',
-    ]
+def evaluate_test(test):
+    G, W = parse_edgelist_to_woods(test)
+    # print(G.edges)
+    distortion = evaluate_routing_protocol_faster(G, W)
+    # print(f'Min distortion: {min(distortion.values())}')
+    # print(f'Max distortion: {max(distortion.values())}')
+    return (min(distortion.values()), max(distortion.values()))
 
-    for test in tests:
-        print(f'Test: {test}')
-        G, W = parse_edgelist_to_woods(test)
-        # print(G.edges)
-        distortion = evaluate_routing_protocol_faster(G, W)
-        print(f'Min distortion: {min(distortion.values())}')
-        print(f'Max distortion: {max(distortion.values())}')
+if __name__ == '__main__':
+    flush = True
+    tests = [f'eval-n{n}-{i}.edgelist' for n in [2000] for i in range(1, 10+1)]
+
+    # Sequential
+    # for test in tests:
+    #     print(f'Test: {test}')
+        
+    #     mini, maxi = evaluate_test(test)
+    #     print(f'Min distortion: {mini}')
+    #     print(f'Max distortion: {maxi}')
+    #     if flush:
+    #         sys.stdout.flush()
+    
+    # Parallel
+    with Pool(processes=5) as pool:
+        results = pool.map(evaluate_test, tests)
+    
+    for i in range(0, len(tests)):
+        print(f'Test: {tests[i]}')
+        mini, maxi = results[i]
+        print(f'Min distortion: {mini}')
+        print(f'Max distortion: {maxi}')

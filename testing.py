@@ -80,6 +80,10 @@ class TestRouting(unittest.TestCase):
         assert is_valid_walk(ex1.G, 2, 9, valid_path)
         assert not is_valid_walk(ex1.G, 2, 9, invalid_path_1)
         assert not is_valid_walk(ex1.G, 2, 9, invalid_path_2)
+        
+    def test_correct_path(self):
+        path_7_2 = localroute.schnyder_local_route(ex1.G, self.W1, 7, 2)
+        assert path_7_2 == [(7, 5), (5, 2)], f'path actually {path_7_2}'
     
     def test_valid_paths(self):
         for s in ex1.G.nodes:
