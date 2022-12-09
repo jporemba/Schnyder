@@ -4,6 +4,7 @@ import localroute
 import example1 as ex1
 import example2 as ex2
 import evaluation
+from colour import Colour
 
 class TestSchnyderData(unittest.TestCase):
     
@@ -11,35 +12,35 @@ class TestSchnyderData(unittest.TestCase):
         self.woods = schnyder.Woods(ex1.G, ex1.red_root, ex1.red_edges, ex1.green_root, ex1.green_edges, ex1.blue_root, ex1.blue_edges)
 
     def test_parent(self):
-        assert self.woods.red_parent(8) == 9
-        assert self.woods.blue_parent(7) == 6
-        assert self.woods.green_parent(7) == 5
+        assert self.woods.parent(Colour.RED, 8) == 9
+        assert self.woods.parent(Colour.BLUE, 7) == 6
+        assert self.woods.parent(Colour.GREEN, 7) == 5
 
     def test_path(self):
-        assert self.woods.path_nodes_red(3) == [3, 5, 9]
-        assert self.woods.path_nodes_blue(5) == [5, 4, 1]
-        assert self.woods.path_nodes_green(8) == [8, 5, 2]
+        assert self.woods.path_nodes(Colour.RED, 3) == [3, 5, 9]
+        assert self.woods.path_nodes(Colour.BLUE, 5) == [5, 4, 1]
+        assert self.woods.path_nodes(Colour.GREEN, 8) == [8, 5, 2]
 
     def test_path_length(self):
-        assert self.woods.path_length_red(4) == 3
-        assert self.woods.path_length_blue(5) == 2
-        assert self.woods.path_length_green(3) == 1
+        assert self.woods.path_length(Colour.RED, 4) == 3
+        assert self.woods.path_length(Colour.BLUE, 5) == 2
+        assert self.woods.path_length(Colour.GREEN, 3) == 1
     
     def test_subtree_size(self):
-        assert self.woods.subtree_size_red(8) == 4
-        assert self.woods.subtree_size_blue(6) == 2
-        assert self.woods.subtree_size_green(3) == 3
+        assert self.woods.subtree_size(Colour.RED, 8) == 4
+        assert self.woods.subtree_size(Colour.BLUE, 6) == 2
+        assert self.woods.subtree_size(Colour.GREEN, 3) == 3
     
     def test_region_size_nodes(self):
-        assert self.woods.region_size_nodes_red(7) == 7
-        assert self.woods.region_size_nodes_blue(7) == 5
-        assert self.woods.region_size_nodes_green(7) == 5
+        assert self.woods.region_size_nodes(Colour.RED, 7) == 7
+        assert self.woods.region_size_nodes(Colour.BLUE, 7) == 5
+        assert self.woods.region_size_nodes(Colour.GREEN, 7) == 5
     
     def test_region_size_triangles(self):
         for node in ex1.G.nodes:
-            assert self.woods.region_size_triangles_red(node) == ex1.red_coords[node]
-            assert self.woods.region_size_triangles_blue(node) == ex1.blue_coords[node]
-            assert self.woods.region_size_triangles_green(node) == ex1.green_coords[node]
+            assert self.woods.region_size_triangles(Colour.RED, node) == ex1.red_coords[node]
+            assert self.woods.region_size_triangles(Colour.BLUE, node) == ex1.blue_coords[node]
+            assert self.woods.region_size_triangles(Colour.GREEN, node) == ex1.green_coords[node]
 
 def is_valid_walk(G, s, t, path):
     if len(path) == 0:
