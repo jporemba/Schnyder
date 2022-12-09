@@ -66,6 +66,12 @@ class Woods:
             (Colour.GREEN, Colour.BLUE): dict(),
         }
         
+        self.region_size_triangles_map = {
+            Colour.RED: dict(),
+            Colour.BLUE: dict(),
+            Colour.GREEN: dict()
+        }
+        
     def parent(self, colour, node):
         if node in self.roots:
             raise Exception(f'Cannot take {colour.name} parent of root {node}')
@@ -144,6 +150,9 @@ class Woods:
     # Region size in number of triangles
     
     def region_size_triangles(self, colour, node):
+        return memoizer2(self.region_size_triangles_map, self.compute_region_size_triangles, colour, node)
+    
+    def compute_region_size_triangles(self, colour, node):
         if node == self.root_map[colour]:
             return 2 * self.n - 5
         elif node in self.roots:
