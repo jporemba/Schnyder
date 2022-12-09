@@ -71,10 +71,6 @@ class Woods:
             Colour.GREEN: dict()
         }
         
-        self.subtree_size_red_map = dict()
-        self.subtree_size_blue_map = dict()
-        self.subtree_size_green_map = dict()
-        
         self.region_size_nodes_red_map = dict()
         self.region_size_nodes_blue_map = dict()
         self.region_size_nodes_green_map = dict()
@@ -124,52 +120,12 @@ class Woods:
             
     def subtree_size_red(self, node):
         return self.subtree_size(Colour.RED, node)
-        # return memoizer(self.subtree_size_red_map, self.compute_subtree_size_red, node)
-            
-    def compute_subtree_size_red(self, node):
-        if node == self.red_root:
-            return self.n
-        elif node in self.roots:
-            return 1
-        else:
-            # Internal node
-            children = list(self.red_tree.predecessors(node))
-            if len(children) == 0:
-                return 1
-            else:
-                return sum([self.subtree_size_red(child) for child in children]) + 1
     
     def subtree_size_blue(self, node):
-        return memoizer(self.subtree_size_blue_map, self.compute_subtree_size_blue, node)
-    
-    def compute_subtree_size_blue(self, node): 
-        if node == self.blue_root:
-            return self.n
-        elif node in self.roots:
-            return 1
-        else:
-            # Internal node
-            children = list(self.blue_tree.predecessors(node))
-            if children == 0:
-                return 1
-            else:
-                return sum([self.subtree_size_blue(child) for child in children]) + 1
+        return self.subtree_size(Colour.BLUE, node)
     
     def subtree_size_green(self, node):
-        return memoizer(self.subtree_size_green_map, self.compute_subtree_size_green, node)
-    
-    def compute_subtree_size_green(self, node): 
-        if node == self.green_root:
-            return self.n
-        elif node in self.roots:
-            return 1
-        else:
-            # Internal node
-            children = list(self.green_tree.predecessors(node))
-            if children == 0:
-                return 1
-            else:
-                return sum([self.subtree_size_green(child) for child in children]) + 1
+        return self.subtree_size(Colour.GREEN, node)
     
     # Path nodes
     
