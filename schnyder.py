@@ -60,9 +60,9 @@ class Woods:
         }
         
         self.root_map = {
-            Colour.RED: self.red_tree,
-            Colour.BLUE: self.blue_tree,
-            Colour.GREEN: self.green_tree
+            Colour.RED: self.red_root,
+            Colour.BLUE: self.blue_root,
+            Colour.GREEN: self.green_root
         }
         
         self.subtree_size_map = {
@@ -86,10 +86,6 @@ class Woods:
             Colour.BLUE: dict(),
             Colour.GREEN: dict()
         }
-        
-        self.path_length_red_map = dict()
-        self.path_length_blue_map = dict()
-        self.path_length_green_map = dict()
         
         self.subtree_size_path_sum_red_blue_map = dict()
         self.subtree_size_path_sum_red_green_map = dict()
@@ -220,18 +216,14 @@ class Woods:
     
     # Region size in number of nodes
     
-    # def region_size_nodes(self, colour, node):
-    #     return memoizer2(self.region_size_nodes_map, self.compute_region_size_nodes, colour, node)
-    
-    # def compute_region_size_nodes(self, colour, node):
-    #     if node == self.red_root:
-    #         return self.n
-    #     elif node in self.roots:
-    #         return 1
-    #     else:
-    #         blue_contribution = self.subtree_size_path_sum_red_blue(node)
-    #         green_contribution = self.subtree_size_path_sum_red_green(node)
-    #         return blue_contribution + green_contribution - self.subtree_size_red(node)
+    def region_size_nodes(self, colour, node):
+        match colour:
+            case Colour.RED:
+                return self.region_size_nodes_red(node)
+            case Colour.BLUE:
+                return self.region_size_nodes_blue(node)
+            case Colour.GREEN:
+                return self.region_size_nodes_green(node)
     
     def region_size_nodes_red(self, node):
         return memoizer(self.region_size_nodes_red_map, self.compute_region_size_nodes_red, node)
@@ -292,35 +284,24 @@ class Woods:
     
     # Region size in number of triangles
     
-    def region_size_triangles_red(self, node):
-        if node == self.red_root:
+    def region_size_triangles(self, colour, node):
+        if node == self.root_map[colour]:
             return 2 * self.n - 5
         elif node in self.roots:
             return 0
         else:
-            n_nodes = self.region_size_nodes_red(node)
-            exterior_cycle_length = self.path_length_blue(node) + self.path_length_green(node) + 1
+            n_nodes = self.region_size_nodes(colour, node)
+            exterior_cycle_length = self.path_length(col_prev(colour), node) + self.path_length(col_next(colour), node) + 1
             return 2 * n_nodes - 2 - exterior_cycle_length
+    
+    def region_size_triangles_red(self, node):
+        return self.region_size_triangles(Colour.RED, node)
     
     def region_size_triangles_blue(self, node):
-        if node == self.blue_root:
-            return 2 * self.n - 5
-        elif node in self.roots:
-            return 0
-        else:
-            n_nodes = self.region_size_nodes_blue(node)
-            exterior_cycle_length = self.path_length_red(node) + self.path_length_green(node) + 1
-            return 2 * n_nodes - 2 - exterior_cycle_length
+        return self.region_size_triangles(Colour.BLUE, node)
     
     def region_size_triangles_green(self, node):
-        if node == self.green_root:
-            return 2 * self.n - 5
-        elif node in self.roots:
-            return 0
-        else:
-            n_nodes = self.region_size_nodes_green(node)
-            exterior_cycle_length = self.path_length_red(node) + self.path_length_blue(node) + 1
-            return 2 * n_nodes - 2 - exterior_cycle_length
+        return self.region_size_triangles(Colour.GREEN, node)
 
 def memoizer(map, fn, input):
     if input not in map:
