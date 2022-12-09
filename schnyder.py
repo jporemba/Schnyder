@@ -1,8 +1,32 @@
 import networkx as nx
 
-# TODO:
-# Enums for colours,
-# cnext, cprev maps
+from enum import Enum
+
+# Colours
+class Colour(Enum):
+    RED = 1
+    BLUE = 2
+    GREEN = 3
+    
+# Cyclic ordering on colours
+    
+col_next_map = {
+    Colour.RED: Colour.BLUE,
+    Colour.BLUE: Colour.GREEN,
+    Colour.GREEN: Colour.RED
+}
+
+col_prev_map = {
+    Colour.RED: Colour.GREEN,
+    Colour.BLUE: Colour.RED,
+    Colour.GREEN: Colour.BLUE
+}
+    
+def col_next(colour):
+    return col_next_map[colour]
+
+def col_prev(colour):
+    return col_prev_map[colour]
 
 class Woods:
     # It is optional to include the bounding triangle in the coloured edges - it will not affect anything.
@@ -29,6 +53,18 @@ class Woods:
         self.green_tree.add_nodes_from(G.nodes)
         self.blue_tree.add_edges_from(blue_edges)
         
+        self.tree_map = {
+            Colour.RED: self.red_tree,
+            Colour.BLUE: self.blue_tree,
+            Colour.GREEN: self.green_tree
+        }
+        
+        self.root_map = {
+            Colour.RED: self.red_tree,
+            Colour.BLUE: self.blue_tree,
+            Colour.GREEN: self.green_tree
+        }
+        
         self.subtree_size_red_map = dict()
         self.subtree_size_blue_map = dict()
         self.subtree_size_green_map = dict()
@@ -45,34 +81,29 @@ class Woods:
         self.subtree_size_path_sum_blue_green_map = dict()
         self.subtree_size_path_sum_green_red_map = dict()
         self.subtree_size_path_sum_green_blue_map = dict()
+        
+    def parent(self, colour, node):
+        if node in self.roots:
+            raise Exception(f'Cannot take {colour.name} parent of root {node}')
+        parents = list(self.tree_map[colour].successors(node))
+        assert len(parents) == 1, f'node {node} has {colour.name} parents {parents}'
+        return parents[0]
     
     def red_parent(self, node):
-        if node in self.roots:
-            raise Exception(f"Cannot take red parent of root {node}")
-        parents = list(self.red_tree.successors(node))
-        assert len(parents) == 1, f'node {node} has red parents {parents}'
-        return parents[0]
+        return self.parent(Colour.RED, node)
     
     def green_parent(self, node):
-        if node in self.roots:
-            raise Exception(f"Cannot take green parent of root {node}")
-        parents = list(self.green_tree.successors(node))
-        assert len(parents) == 1, f'node {node} has green parents {parents}'
-        return parents[0]
+        return self.parent(Colour.GREEN, node)
     
     def blue_parent(self, node):
-        if node in self.roots:
-            raise Exception(f"Cannot take blue parent of root {node}")
-        parents = list(self.blue_tree.successors(node))
-        assert len(parents) == 1, f'node {node} has blue parents {parents}'
-        return parents[0]
+        return self.parent(Colour.BLUE, node)
             
     def subtree_size_red(self, node):
         if node not in self.subtree_size_red_map:
             self.subtree_size_red_map[node] = self.compute_subtree_size_red(node)
         return self.subtree_size_red_map[node]
             
-    def compute_subtree_size_red(self, node): 
+    def compute_subtree_size_red(self, node):
         if node == self.red_root:
             return self.n
         elif node in self.roots:
@@ -122,35 +153,24 @@ class Woods:
             else:
                 return sum([self.subtree_size_green(child) for child in children]) + 1
     
-    def path_nodes_red(self, node):
-        if node == self.blue_root or node == self.green_root:
-            raise Exception("Cannot find path for other coloured roots")
+    def path_nodes(self, colour, node):
+        if node == self.root_map[col_prev(colour)] or node == self.root_map[col_next(colour)]:
+            raise Exception('Cannot find path for other coloured roots')
         current = node
         path = [current]
         while current not in self.roots:
-            current = self.red_parent(current)
+            current = self.parent(colour, current)
             path.append(current)
         return path
+
+    def path_nodes_red(self, node):
+        return self.path_nodes(Colour.RED, node)
     
     def path_nodes_blue(self, node):
-        if node == self.red_root or node == self.green_root:
-            raise Exception("Cannot find path for other coloured roots")
-        current = node
-        path = [current]
-        while current not in self.roots:
-            current = self.blue_parent(current)
-            path.append(current)
-        return path
+        return self.path_nodes(Colour.BLUE, node)
     
     def path_nodes_green(self, node):
-        if node == self.blue_root or node == self.red_root:
-            raise Exception("Cannot find path for other coloured roots")
-        current = node
-        path = [current]
-        while current not in self.roots:
-            current = self.green_parent(current)
-            path.append(current)
-        return path
+        return self.path_nodes(Colour.GREEN, node)
     
     def region_size_nodes_red(self, node):
         if node not in self.region_size_nodes_red_map:
