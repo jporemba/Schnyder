@@ -1,5 +1,6 @@
 import networkx as nx
 import time
+from colour import Colour
 
 def sign(a):
     if a > 0:
@@ -16,15 +17,15 @@ def sign_pessimistic(a):
         return -1
 
 def schnyder_direction_sig(woods, src, dest):
-    r_direction = sign(woods.region_size_triangles_red(dest) - woods.region_size_triangles_red(src))
-    g_direction = sign(woods.region_size_triangles_green(dest) - woods.region_size_triangles_green(src))
-    b_direction = sign(woods.region_size_triangles_blue(dest) - woods.region_size_triangles_blue(src))
+    r_direction = sign(woods.region_size_triangles(Colour.RED, dest) - woods.region_size_triangles(Colour.RED, src))
+    g_direction = sign(woods.region_size_triangles(Colour.GREEN, dest) - woods.region_size_triangles(Colour.GREEN, src))
+    b_direction = sign(woods.region_size_triangles(Colour.BLUE, dest) - woods.region_size_triangles(Colour.BLUE, src))
     return {'red': r_direction, 'green': g_direction, 'blue': b_direction}
 
 def schnyder_direction_sig_pessimistic(woods, src, dest):
-    r_direction = sign_pessimistic(woods.region_size_triangles_red(dest) - woods.region_size_triangles_red(src))
-    g_direction = sign_pessimistic(woods.region_size_triangles_green(dest) - woods.region_size_triangles_green(src))
-    b_direction = sign_pessimistic(woods.region_size_triangles_blue(dest) - woods.region_size_triangles_blue(src))
+    r_direction = sign_pessimistic(woods.region_size_triangles(Colour.RED, dest) - woods.region_size_triangles(Colour.RED, src))
+    g_direction = sign_pessimistic(woods.region_size_triangles(Colour.GREEN, dest) - woods.region_size_triangles(Colour.GREEN, src))
+    b_direction = sign_pessimistic(woods.region_size_triangles(Colour.BLUE, dest) - woods.region_size_triangles(Colour.BLUE, src))
     return {'red': r_direction, 'green': g_direction, 'blue': b_direction}
 
 pure_red = {'red': +1, 'green': -1, 'blue': -1}
@@ -44,11 +45,11 @@ def schnyder_next(G, woods, src, dest):
         sig = schnyder_direction_sig_pessimistic(woods, src, dest)
         # print(f'p-sig: {sig}')
         if sig == pure_red:
-            return woods.red_parent(src)
+            return woods.parent(Colour.RED, src)
         elif sig == pure_green:
-            return woods.green_parent(src)
+            return woods.parent(Colour.GREEN, src)
         elif sig == pure_blue:
-            return woods.blue_parent(src)
+            return woods.parent(Colour.BLUE, src)
         elif sig == anti_red:
             for neighbour in src_neighbours:
                 sig_neighbour_dest = schnyder_direction_sig(woods, neighbour, dest)
