@@ -71,9 +71,22 @@ class Woods:
             Colour.GREEN: dict()
         }
         
+        self.region_size_nodes_map = {
+            Colour.RED: dict(),
+            Colour.BLUE: dict(),
+            Colour.GREEN: dict()
+        }
+        
         self.region_size_nodes_red_map = dict()
         self.region_size_nodes_blue_map = dict()
         self.region_size_nodes_green_map = dict()
+        
+        self.path_length_map = {
+            Colour.RED: dict(),
+            Colour.BLUE: dict(),
+            Colour.GREEN: dict()
+        }
+        
         self.path_length_red_map = dict()
         self.path_length_blue_map = dict()
         self.path_length_green_map = dict()
@@ -207,6 +220,19 @@ class Woods:
     
     # Region size in number of nodes
     
+    # def region_size_nodes(self, colour, node):
+    #     return memoizer2(self.region_size_nodes_map, self.compute_region_size_nodes, colour, node)
+    
+    # def compute_region_size_nodes(self, colour, node):
+    #     if node == self.red_root:
+    #         return self.n
+    #     elif node in self.roots:
+    #         return 1
+    #     else:
+    #         blue_contribution = self.subtree_size_path_sum_red_blue(node)
+    #         green_contribution = self.subtree_size_path_sum_red_green(node)
+    #         return blue_contribution + green_contribution - self.subtree_size_red(node)
+    
     def region_size_nodes_red(self, node):
         return memoizer(self.region_size_nodes_red_map, self.compute_region_size_nodes_red, node)
     
@@ -247,24 +273,22 @@ class Woods:
             return red_contribution + blue_contribution - self.subtree_size_green(node)
     
     # Path length in number of edges
+    # TODO optimize
+    
+    def path_length(self, colour, node):
+        return memoizer2(self.path_length_map, self.compute_path_length, colour, node)
+    
+    def compute_path_length(self, colour, node):
+        return len(self.path_nodes(colour, node)) - 1
     
     def path_length_red(self, node):
-        return memoizer(self.path_length_red_map, self.compute_path_length_red, node)
-    
-    def compute_path_length_red(self, node):
-        return len(self.path_nodes_red(node)) - 1
+        return self.path_length(Colour.RED, node)
     
     def path_length_blue(self, node):
-        return memoizer(self.path_length_blue_map, self.compute_path_length_blue, node)
-    
-    def compute_path_length_blue(self, node):
-        return len(self.path_nodes_blue(node)) - 1
+        return self.path_length(Colour.BLUE, node)
     
     def path_length_green(self, node):
-        return memoizer(self.path_length_green_map, self.compute_path_length_green, node)
-    
-    def compute_path_length_green(self, node):
-        return len(self.path_nodes_green(node)) - 1
+        return self.path_length(Colour.GREEN, node)
     
     # Region size in number of triangles
     
