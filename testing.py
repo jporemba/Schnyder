@@ -10,6 +10,7 @@ class TestSchnyderData(unittest.TestCase):
     
     def setUp(self):
         self.woods = schnyder.Woods(ex1.G, ex1.red_root, ex1.red_edges, ex1.green_root, ex1.green_edges, ex1.blue_root, ex1.blue_edges)
+        self.data = schnyder.Data(self.woods)
 
     def test_parent(self):
         assert self.woods.parent(Colour.RED, 8) == 9
@@ -22,25 +23,25 @@ class TestSchnyderData(unittest.TestCase):
         assert self.woods.path_nodes(Colour.GREEN, 8) == [8, 5, 2]
 
     def test_path_length(self):
-        assert self.woods.path_length(Colour.RED, 4) == 3
-        assert self.woods.path_length(Colour.BLUE, 5) == 2
-        assert self.woods.path_length(Colour.GREEN, 3) == 1
+        assert self.data.path_length(Colour.RED, 4) == 3
+        assert self.data.path_length(Colour.BLUE, 5) == 2
+        assert self.data.path_length(Colour.GREEN, 3) == 1
     
     def test_subtree_size(self):
-        assert self.woods.subtree_size(Colour.RED, 8) == 4
-        assert self.woods.subtree_size(Colour.BLUE, 6) == 2
-        assert self.woods.subtree_size(Colour.GREEN, 3) == 3
+        assert self.data.subtree_size(Colour.RED, 8) == 4
+        assert self.data.subtree_size(Colour.BLUE, 6) == 2
+        assert self.data.subtree_size(Colour.GREEN, 3) == 3
     
     def test_region_size_nodes(self):
-        assert self.woods.region_size_nodes(Colour.RED, 7) == 7
-        assert self.woods.region_size_nodes(Colour.BLUE, 7) == 5
-        assert self.woods.region_size_nodes(Colour.GREEN, 7) == 5
+        assert self.data.region_size_nodes(Colour.RED, 7) == 7
+        assert self.data.region_size_nodes(Colour.BLUE, 7) == 5
+        assert self.data.region_size_nodes(Colour.GREEN, 7) == 5
     
     def test_region_size_triangles(self):
         for node in ex1.G.nodes:
-            assert self.woods.region_size_triangles(Colour.RED, node) == ex1.red_coords[node]
-            assert self.woods.region_size_triangles(Colour.BLUE, node) == ex1.blue_coords[node]
-            assert self.woods.region_size_triangles(Colour.GREEN, node) == ex1.green_coords[node]
+            assert self.data.region_size_triangles(Colour.RED, node) == ex1.red_coords[node]
+            assert self.data.region_size_triangles(Colour.BLUE, node) == ex1.blue_coords[node]
+            assert self.data.region_size_triangles(Colour.GREEN, node) == ex1.green_coords[node]
 
 def is_valid_walk(G, s, t, path):
     if len(path) == 0:
@@ -63,16 +64,16 @@ def is_valid_walk(G, s, t, path):
 class TestRouting(unittest.TestCase):
     
     def setUp(self):
-        self.W1 = schnyder.Woods(ex1.G, ex1.red_root, ex1.red_edges, ex1.green_root, ex1.green_edges, ex1.blue_root, ex1.blue_edges)
-        self.W2 = schnyder.Woods(ex2.G, ex2.red_root, ex2.red_edges, ex2.green_root, ex2.green_edges, ex2.blue_root, ex2.blue_edges)
+        self.S1 = schnyder.Schnyder(ex1.G, ex1.red_root, ex1.red_edges, ex1.green_root, ex1.green_edges, ex1.blue_root, ex1.blue_edges)
+        self.S2 = schnyder.Schnyder(ex2.G, ex2.red_root, ex2.red_edges, ex2.green_root, ex2.green_edges, ex2.blue_root, ex2.blue_edges)
         
     def test_no_explode(self):
         for s in ex1.G.nodes:
             for t in ex1.G.nodes:
-                localroute.schnyder_local_route(ex1.G, self.W1, s, t)
+                localroute.schnyder_local_route(ex1.G, self.S1, s, t)
         for s in ex2.G.nodes:
             for t in ex2.G.nodes:
-                localroute.schnyder_local_route(ex2.G, self.W2, s, t)
+                localroute.schnyder_local_route(ex2.G, self.S2, s, t)
     
     def test_meta_valid_paths(self):
         valid_path = [(2, 3), (3, 4), (4, 7), (7, 8), (8, 1), (1, 9)]
@@ -83,17 +84,17 @@ class TestRouting(unittest.TestCase):
         assert not is_valid_walk(ex1.G, 2, 9, invalid_path_2)
         
     def test_correct_path(self):
-        path_7_2 = localroute.schnyder_local_route(ex1.G, self.W1, 7, 2)
+        path_7_2 = localroute.schnyder_local_route(ex1.G, self.S1, 7, 2)
         assert path_7_2 == [(7, 5), (5, 2)], f'path actually {path_7_2}'
     
     def test_valid_paths(self):
         for s in ex1.G.nodes:
             for t in ex1.G.nodes:
-                routing_path = localroute.schnyder_local_route(ex1.G, self.W1, s, t)
+                routing_path = localroute.schnyder_local_route(ex1.G, self.S1, s, t)
                 assert is_valid_walk(ex1.G, s, t, routing_path)
         for s in ex2.G.nodes:
             for t in ex2.G.nodes:
-                routing_path = localroute.schnyder_local_route(ex2.G, self.W2, s, t)
+                routing_path = localroute.schnyder_local_route(ex2.G, self.S2, s, t)
                 assert is_valid_walk(ex2.G, s, t, routing_path)
 
 class TestRoutingFile(unittest.TestCase):
@@ -101,16 +102,16 @@ class TestRoutingFile(unittest.TestCase):
     def setUp(self):
         self.subtests = []
         for i in [1, 2, 3, 4]:
-            G, W = evaluation.parse_edgelist_to_woods(f'unittest{i}.edgelist')
-            self.subtests.append((G, W))
+            G, S = evaluation.parse_edgelist_to_schnyder(f'unittest{i}.edgelist')
+            self.subtests.append((G, S))
         
     def test_valid_paths(self):
         for subtest in self.subtests:
-            G, W = subtest
+            G, S = subtest
             for s in G.nodes:
                 for t in G.nodes:
                     # print(f's: {s}, t: {t}')
-                    routing_path = localroute.schnyder_local_route(G, W, s, t)
+                    routing_path = localroute.schnyder_local_route(G, S, s, t)
                     assert is_valid_walk(G, s, t, routing_path)
 
 class TestEval(unittest.TestCase):
@@ -118,14 +119,14 @@ class TestEval(unittest.TestCase):
     def setUp(self):
         self.subtests = []
         for i in [1, 2, 3, 4]:
-            G, W = evaluation.parse_edgelist_to_woods(f'unittest{i}.edgelist')
-            self.subtests.append((G, W))
+            G, S = evaluation.parse_edgelist_to_schnyder(f'unittest{i}.edgelist')
+            self.subtests.append((G, S))
             
     def test_evaluate_routing_protocol_faster(self):
         for subtest in self.subtests:
-            G, W = subtest
-            distortion1 = evaluation.evaluate_routing_protocol(G, W)
-            distortion2 = evaluation.evaluate_routing_protocol_faster(G, W)
+            G, S = subtest
+            distortion1 = evaluation.evaluate_routing_protocol(G, S)
+            distortion2 = evaluation.evaluate_routing_protocol_faster(G, S)
             assert len(distortion1) == len(distortion2)
             assert distortion1 == distortion2, f'\nd1: {distortion1}\nd2: {distortion2}'
 

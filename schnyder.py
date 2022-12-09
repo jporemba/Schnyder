@@ -38,6 +38,47 @@ class Woods:
             Colour.BLUE: self.blue_root,
             Colour.GREEN: self.green_root
         }
+    
+    def root(self, colour):
+        return self.root_map[colour]
+    
+    def parent(self, colour, node):
+        if node in self.roots:
+            raise Exception(f'Cannot take {colour.name} parent of root {node}')
+        parents = list(self.tree_map[colour].successors(node))
+        assert len(parents) == 1, f'node {node} has {colour.name} parents {parents}'
+        return parents[0]
+    
+    def children(self, colour, node):
+        return list(self.tree_map[colour].predecessors(node))
+    
+    # Path nodes
+    
+    def path_nodes(self, colour, node):
+        if node == self.root(col_prev(colour)) or node == self.root(col_next(colour)):
+            raise Exception('Cannot find path for other coloured roots')
+        current = node
+        path = [current]
+        while current not in self.roots:
+            current = self.parent(colour, current)
+            path.append(current)
+        return path
+
+def memoizer(map, fn, input):
+    if input not in map:
+        map[input] = fn(input)
+    return map[input]
+
+def memoizer2(map2, fn2, inputx, inputy):
+    if inputy not in map2[inputx]:
+        map2[inputx][inputy] = fn2(inputx, inputy)
+    return map2[inputx][inputy]
+
+# Class for computing schnyder coordinates
+class Data:
+    
+    def __init__(self, woods):
+        self.woods = woods
         
         self.subtree_size_map = {
             Colour.RED: dict(),
@@ -71,43 +112,24 @@ class Woods:
             Colour.BLUE: dict(),
             Colour.GREEN: dict()
         }
-        
-    def parent(self, colour, node):
-        if node in self.roots:
-            raise Exception(f'Cannot take {colour.name} parent of root {node}')
-        parents = list(self.tree_map[colour].successors(node))
-        assert len(parents) == 1, f'node {node} has {colour.name} parents {parents}'
-        return parents[0]
     
     # Subtree size in number of nodes
     def subtree_size(self, colour, node):
         return memoizer2(self.subtree_size_map, self.compute_subtree_size, colour, node)
     
     def compute_subtree_size(self, colour, node):
-        if node == self.root_map[colour]:
+        if node == self.woods.root(colour):
             return self.n
-        elif node in self.roots:
+        elif node in self.woods.roots:
             return 1
         else:
             # Internal node
-            children = list(self.tree_map[colour].predecessors(node))
+            children = self.woods.children(colour, node)
             if len(children) == 0:
                 return 1
             else:
                 return sum([self.subtree_size(colour, child) for child in children]) + 1
-    
-    # Path nodes
-    
-    def path_nodes(self, colour, node):
-        if node == self.root_map[col_prev(colour)] or node == self.root_map[col_next(colour)]:
-            raise Exception('Cannot find path for other coloured roots')
-        current = node
-        path = [current]
-        while current not in self.roots:
-            current = self.parent(colour, current)
-            path.append(current)
-        return path
-    
+
     # Subtree path sums
     # First colour is subtree, second colour is path
     
@@ -116,10 +138,10 @@ class Woods:
     
     def compute_subtree_size_path_sum(self, col_tuple, node):
         col_tree, col_path = col_tuple
-        if node == self.root_map[col_path]:
+        if node == self.woods.root(col_path):
             return self.subtree_size(col_tree, node)
         else:
-            return self.subtree_size_path_sum(col_tree, col_path, self.parent(col_path, node)) + self.subtree_size(col_tree, node)
+            return self.subtree_size_path_sum(col_tree, col_path, self.woods.parent(col_path, node)) + self.subtree_size(col_tree, node)
     
     # Region size in number of nodes
     
@@ -127,9 +149,9 @@ class Woods:
         return memoizer2(self.region_size_nodes_map, self.compute_region_size_nodes, colour, node)
         
     def compute_region_size_nodes(self, colour, node):
-        if node == self.root_map[colour]:
+        if node == self.woods.root(colour):
             return self.n
-        elif node in self.roots:
+        elif node in self.woods.roots:
             return 1
         else:
             col_prev_contribution = self.subtree_size_path_sum(colour, col_prev(colour), node)
@@ -142,10 +164,10 @@ class Woods:
         return memoizer2(self.path_length_map, self.compute_path_length, colour, node)
     
     def compute_path_length(self, colour, node):
-        if node == self.root_map[colour]:
+        if node == self.woods.root(colour):
             return 0
         else:
-            return self.path_length(colour, self.parent(colour, node)) + 1
+            return self.path_length(colour, self.woods.parent(colour, node)) + 1
     
     # Region size in number of triangles
     
@@ -153,21 +175,18 @@ class Woods:
         return memoizer2(self.region_size_triangles_map, self.compute_region_size_triangles, colour, node)
     
     def compute_region_size_triangles(self, colour, node):
-        if node == self.root_map[colour]:
-            return 2 * self.n - 5
-        elif node in self.roots:
+        if node == self.woods.root(colour):
+            return 2 * self.woods.n - 5
+        elif node in self.woods.roots:
             return 0
         else:
             n_nodes = self.region_size_nodes(colour, node)
             exterior_cycle_length = self.path_length(col_prev(colour), node) + self.path_length(col_next(colour), node) + 1
             return 2 * n_nodes - 2 - exterior_cycle_length
 
-def memoizer(map, fn, input):
-    if input not in map:
-        map[input] = fn(input)
-    return map[input]
-
-def memoizer2(map2, fn2, inputx, inputy):
-    if inputy not in map2[inputx]:
-        map2[inputx][inputy] = fn2(inputx, inputy)
-    return map2[inputx][inputy]
+class Schnyder:
+    
+    def __init__(self, G, red_root, red_edges, green_root, green_edges, blue_root, blue_edges):
+        self.G = G
+        self.woods = Woods(G, red_root, red_edges, green_root, green_edges, blue_root, blue_edges)
+        self.data = Data(self.woods)
