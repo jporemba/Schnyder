@@ -65,9 +65,16 @@ class Woods:
             Colour.GREEN: self.green_tree
         }
         
+        self.subtree_size_map = {
+            Colour.RED: dict(),
+            Colour.BLUE: dict(),
+            Colour.GREEN: dict()
+        }
+        
         self.subtree_size_red_map = dict()
         self.subtree_size_blue_map = dict()
         self.subtree_size_green_map = dict()
+        
         self.region_size_nodes_red_map = dict()
         self.region_size_nodes_blue_map = dict()
         self.region_size_nodes_green_map = dict()
@@ -99,9 +106,25 @@ class Woods:
         return self.parent(Colour.BLUE, node)
     
     # Subtree size in number of nodes
+    def subtree_size(self, colour, node):
+        return memoizer2(self.subtree_size_map, self.compute_subtree_size, colour, node)
+    
+    def compute_subtree_size(self, colour, node):
+        if node == self.root_map[colour]:
+            return self.n
+        elif node in self.roots:
+            return 1
+        else:
+            # Internal node
+            children = list(self.tree_map[colour].predecessors(node))
+            if len(children) == 0:
+                return 1
+            else:
+                return sum([self.subtree_size(colour, child) for child in children]) + 1
             
     def subtree_size_red(self, node):
-        return memoizer(self.subtree_size_red_map, self.compute_subtree_size_red, node)
+        return self.subtree_size(Colour.RED, node)
+        # return memoizer(self.subtree_size_red_map, self.compute_subtree_size_red, node)
             
     def compute_subtree_size_red(self, node):
         if node == self.red_root:
@@ -323,3 +346,8 @@ def memoizer(map, fn, input):
     if input not in map:
         map[input] = fn(input)
     return map[input]
+
+def memoizer2(map2, fn2, inputx, inputy):
+    if inputy not in map2[inputx]:
+        map2[inputx][inputy] = fn2(inputx, inputy)
+    return map2[inputx][inputy]
