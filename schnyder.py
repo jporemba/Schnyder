@@ -131,13 +131,15 @@ class Woods:
             return col_prev_contribution + col_next_contribution - self.subtree_size(colour, node)
     
     # Path length in number of edges
-    # TODO optimize
     
     def path_length(self, colour, node):
         return memoizer2(self.path_length_map, self.compute_path_length, colour, node)
     
     def compute_path_length(self, colour, node):
-        return len(self.path_nodes(colour, node)) - 1
+        if node == self.root_map[colour]:
+            return 0
+        else:
+            return self.path_length(colour, self.parent(colour, node)) + 1
     
     # Region size in number of triangles
     
