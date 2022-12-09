@@ -87,12 +87,14 @@ class Woods:
             Colour.GREEN: dict()
         }
         
-        self.subtree_size_path_sum_red_blue_map = dict()
-        self.subtree_size_path_sum_red_green_map = dict()
-        self.subtree_size_path_sum_blue_red_map = dict()
-        self.subtree_size_path_sum_blue_green_map = dict()
-        self.subtree_size_path_sum_green_red_map = dict()
-        self.subtree_size_path_sum_green_blue_map = dict()
+        self.subtree_size_path_sum_map = {
+            (Colour.RED, Colour.BLUE): dict(),
+            (Colour.RED, Colour.GREEN): dict(),
+            (Colour.BLUE, Colour.RED): dict(),
+            (Colour.BLUE, Colour.GREEN): dict(),
+            (Colour.GREEN, Colour.RED): dict(),
+            (Colour.GREEN, Colour.BLUE): dict(),
+        }
         
     def parent(self, colour, node):
         if node in self.roots:
@@ -160,59 +162,33 @@ class Woods:
     # Subtree path sums
     # First colour is subtree, second colour is path
     
-    def subtree_size_path_sum_red_blue(self, node):
-        return memoizer(self.subtree_size_path_sum_red_blue_map, self.compute_subtree_size_path_sum_red_blue, node)
+    def subtree_size_path_sum(self, col_tree, col_path, node):
+        return memoizer2(self.subtree_size_path_sum_map, self.compute_subtree_size_path_sum, (col_tree, col_path), node)
     
-    def compute_subtree_size_path_sum_red_blue(self, node):
-        if node == self.blue_root:
-            return self.subtree_size_red(node)
+    def compute_subtree_size_path_sum(self, col_tuple, node):
+        col_tree, col_path = col_tuple
+        if node == self.root_map[col_path]:
+            return self.subtree_size(col_tree, node)
         else:
-            return self.subtree_size_path_sum_red_blue(self.blue_parent(node)) + self.subtree_size_red(node)
+            return self.subtree_size_path_sum(col_tree, col_path, self.parent(col_path, node)) + self.subtree_size(col_tree, node)
+    
+    def subtree_size_path_sum_red_blue(self, node):
+        return self.subtree_size_path_sum(Colour.RED, Colour.BLUE, node)
         
     def subtree_size_path_sum_red_green(self, node):
-        return memoizer(self.subtree_size_path_sum_red_green_map, self.compute_subtree_size_path_sum_red_green, node)
-
-    def compute_subtree_size_path_sum_red_green(self, node):
-        if node == self.green_root:
-            return self.subtree_size_red(node)
-        else:
-            return self.subtree_size_path_sum_red_green(self.green_parent(node)) + self.subtree_size_red(node)
+        return self.subtree_size_path_sum(Colour.RED, Colour.GREEN, node)
     
     def subtree_size_path_sum_blue_red(self, node):
-        return memoizer(self.subtree_size_path_sum_blue_red_map, self.compute_subtree_size_path_sum_blue_red, node)
-    
-    def compute_subtree_size_path_sum_blue_red(self, node):
-        if node == self.red_root:
-            return self.subtree_size_blue(node)
-        else:
-            return self.subtree_size_path_sum_blue_red(self.red_parent(node)) + self.subtree_size_blue(node)
+        return self.subtree_size_path_sum(Colour.BLUE, Colour.RED, node)
 
     def subtree_size_path_sum_blue_green(self, node):
-        return memoizer(self.subtree_size_path_sum_blue_green_map, self.compute_subtree_size_path_sum_blue_green, node)
-
-    def compute_subtree_size_path_sum_blue_green(self, node):
-        if node == self.green_root:
-            return self.subtree_size_blue(node)
-        else:
-            return self.subtree_size_path_sum_blue_green(self.green_parent(node)) + self.subtree_size_blue(node)
+        return self.subtree_size_path_sum(Colour.BLUE, Colour.GREEN, node)
     
     def subtree_size_path_sum_green_red(self, node):
-        return memoizer(self.subtree_size_path_sum_green_red_map, self.compute_subtree_size_path_sum_green_red, node)
-    
-    def compute_subtree_size_path_sum_green_red(self, node):
-        if node == self.red_root:
-            return self.subtree_size_green(node)
-        else:
-            return self.subtree_size_path_sum_green_red(self.red_parent(node)) + self.subtree_size_green(node)
+        return self.subtree_size_path_sum(Colour.GREEN, Colour.RED, node)
 
     def subtree_size_path_sum_green_blue(self, node):
-        return memoizer(self.subtree_size_path_sum_green_blue_map, self.compute_subtree_size_path_sum_green_blue, node)
-    
-    def compute_subtree_size_path_sum_green_blue(self, node):
-        if node == self.blue_root:
-            return self.subtree_size_green(node)
-        else:
-            return self.subtree_size_path_sum_green_blue(self.blue_parent(node)) + self.subtree_size_green(node)
+        return self.subtree_size_path_sum(Colour.GREEN, Colour.BLUE, node)
     
     # Region size in number of nodes
     
