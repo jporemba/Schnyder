@@ -193,52 +193,26 @@ class Woods:
     # Region size in number of nodes
     
     def region_size_nodes(self, colour, node):
-        match colour:
-            case Colour.RED:
-                return self.region_size_nodes_red(node)
-            case Colour.BLUE:
-                return self.region_size_nodes_blue(node)
-            case Colour.GREEN:
-                return self.region_size_nodes_green(node)
+        return memoizer2(self.region_size_nodes_map, self.compute_region_size_nodes, colour, node)
+        
+    def compute_region_size_nodes(self, colour, node):
+        if node == self.root_map[colour]:
+            return self.n
+        elif node in self.roots:
+            return 1
+        else:
+            col_prev_contribution = self.subtree_size_path_sum(colour, col_prev(colour), node)
+            col_next_contribution = self.subtree_size_path_sum(colour, col_next(colour), node)
+            return col_prev_contribution + col_next_contribution - self.subtree_size(colour, node)
     
     def region_size_nodes_red(self, node):
-        return memoizer(self.region_size_nodes_red_map, self.compute_region_size_nodes_red, node)
-    
-    def compute_region_size_nodes_red(self, node):
-        if node == self.red_root:
-            return self.n
-        elif node in self.roots:
-            return 1
-        else:
-            blue_contribution = self.subtree_size_path_sum_red_blue(node)
-            green_contribution = self.subtree_size_path_sum_red_green(node)
-            return blue_contribution + green_contribution - self.subtree_size_red(node)
+        return self.region_size_nodes(Colour.RED, node)
     
     def region_size_nodes_blue(self, node):
-        return memoizer(self.region_size_nodes_blue_map, self.compute_region_size_nodes_blue, node)
-    
-    def compute_region_size_nodes_blue(self, node):
-        if node == self.blue_root:
-            return self.n
-        elif node in self.roots:
-            return 1
-        else:
-            red_contribution = self.subtree_size_path_sum_blue_red(node)
-            green_contribution = self.subtree_size_path_sum_blue_green(node)
-            return red_contribution + green_contribution - self.subtree_size_blue(node)
+        return self.region_size_nodes(Colour.BLUE, node)
     
     def region_size_nodes_green(self, node):
-        return memoizer(self.region_size_nodes_green_map, self.compute_region_size_nodes_green, node)
-    
-    def compute_region_size_nodes_green(self, node):
-        if node == self.green_root:
-            return self.n
-        elif node in self.roots:
-            return 1
-        else:
-            red_contribution = self.subtree_size_path_sum_green_red(node)
-            blue_contribution = self.subtree_size_path_sum_green_blue(node)
-            return red_contribution + blue_contribution - self.subtree_size_green(node)
+        return self.region_size_nodes(Colour.GREEN, node)
     
     # Path length in number of edges
     # TODO optimize
