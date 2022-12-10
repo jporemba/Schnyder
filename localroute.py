@@ -15,18 +15,20 @@ def sign_pessimistic(a):
         return 1
     else:
         return -1
+    
+def schnyder_difference(S, src, dest):
+    r = sign(S.data.region_size_triangles(Colour.RED, dest) - S.data.region_size_triangles(Colour.RED, src))
+    b = sign(S.data.region_size_triangles(Colour.BLUE, dest) - S.data.region_size_triangles(Colour.BLUE, src))
+    g = sign(S.data.region_size_triangles(Colour.GREEN, dest) - S.data.region_size_triangles(Colour.GREEN, src))
+    return {Colour.RED: r, Colour.BLUE: b, Colour.GREEN: g}
 
 def schnyder_direction_sig(S, src, dest):
-    r_direction = sign(S.data.region_size_triangles(Colour.RED, dest) - S.data.region_size_triangles(Colour.RED, src))
-    b_direction = sign(S.data.region_size_triangles(Colour.BLUE, dest) - S.data.region_size_triangles(Colour.BLUE, src))
-    g_direction = sign(S.data.region_size_triangles(Colour.GREEN, dest) - S.data.region_size_triangles(Colour.GREEN, src))
-    return {Colour.RED: r_direction, Colour.GREEN: g_direction, Colour.BLUE: b_direction}
+    diff = schnyder_difference(S, src, dest)
+    return {colour: sign(delta) for (colour, delta) in diff.items()}
 
 def schnyder_direction_sig_pessimistic(S, src, dest):
-    r_direction = sign_pessimistic(S.data.region_size_triangles(Colour.RED, dest) - S.data.region_size_triangles(Colour.RED, src))
-    b_direction = sign_pessimistic(S.data.region_size_triangles(Colour.BLUE, dest) - S.data.region_size_triangles(Colour.BLUE, src))
-    g_direction = sign_pessimistic(S.data.region_size_triangles(Colour.GREEN, dest) - S.data.region_size_triangles(Colour.GREEN, src))
-    return {Colour.RED: r_direction, Colour.GREEN: g_direction, Colour.BLUE: b_direction}
+    diff = schnyder_difference(S, src, dest)
+    return {colour: sign_pessimistic(delta) for (colour, delta) in diff.items()}
 
 pure_red = {Colour.RED: +1, Colour.GREEN: -1, Colour.BLUE: -1}
 pure_blue = {Colour.RED: -1, Colour.GREEN: -1, Colour.BLUE: +1}
