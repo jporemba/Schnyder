@@ -30,6 +30,9 @@ class TestSchnyderData(unittest.TestCase):
         assert self.S.data.subtree_size(Colour.RED, 8) == 4
         assert self.S.data.subtree_size(Colour.BLUE, 6) == 2
         assert self.S.data.subtree_size(Colour.GREEN, 3) == 3
+        assert self.S.data.subtree_size(Colour.RED, 9) == 9
+        assert self.S.data.subtree_size(Colour.RED, 1) == 1
+        assert self.S.data.subtree_size(Colour.RED, 2) == 1
     
     def test_region_size_nodes(self):
         assert self.S.data.region_size_nodes(Colour.RED, 7) == 7

@@ -119,7 +119,7 @@ class Data:
     
     def compute_subtree_size(self, colour, node):
         if node == self.woods.root(colour):
-            return self.n
+            return self.woods.n
         elif node in self.woods.roots:
             return 1
         else:
@@ -150,7 +150,7 @@ class Data:
         
     def compute_region_size_nodes(self, colour, node):
         if node == self.woods.root(colour):
-            return self.n
+            return self.woods.n
         elif node in self.woods.roots:
             return 1
         else:
