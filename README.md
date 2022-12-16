@@ -2,8 +2,15 @@
 CPSC 516 Project
 
 ## Dependencies
-* networkx
-* scipy 
+* NetworkX
+* SageMath
+
+## Finding Your Way Around
+
+* `localroute.py`: the routing algorithm
+* `schnyder.py`: navigating Schnyder woods and computing Schnyder coordinates
+* `evaluation.py`: evaluation code
+* `random_triangulation.sage`: generate random triangulations using SageMath
 
 ## Unit Testing
 
